@@ -153,10 +153,51 @@ h2 {
     font-weight: 700;
 }
 
-.file-picker input {
-    max-width: 210px;
+.file-control {
+    display: flex;
+    min-width: 250px;
+    align-items: center;
+    gap: 10px;
     padding: 6px;
+    border: 1px solid #c9d1df;
+    border-radius: 9px;
+    background: #ffffff;
+    cursor: pointer;
+}
+
+.file-picker:focus-within .file-control {
+    border-color: var(--primary);
+    outline: 3px solid rgba(49, 87, 213, 0.14);
+}
+
+.file-select-button {
+    padding: 7px 10px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: #f4f7fb;
+    color: var(--text);
+    font-size: 0.82rem;
+    white-space: nowrap;
+}
+
+.file-name {
+    max-width: 170px;
+    overflow: hidden;
+    color: var(--muted);
     font-size: 0.8rem;
+    font-weight: 500;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.file-input-native {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
 }
 
 .contact-filters {
@@ -531,10 +572,15 @@ textarea {
         flex-direction: column;
     }
 
-    .file-picker input,
+    .file-control,
     .excel-links .button {
         max-width: none;
+        min-width: 0;
         width: 100%;
+    }
+
+    .file-name {
+        max-width: none;
     }
 
     .contact-card {

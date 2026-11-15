@@ -83,6 +83,8 @@ def test_contact_list_has_excel_actions(client):
     assert b"Import" in response.data
     assert b"Export contacts" in response.data
     assert b"Download example" in response.data
+    assert b"Select file" in response.data
+    assert b"No file selected" in response.data
 
 
 def test_example_workbook_is_available_and_compatible(client, database):

@@ -25,7 +25,11 @@
     <form class="import-form" method="post" action="{{ url_for('excel.import_contacts_route') }}" enctype="multipart/form-data">
         <label class="file-picker">
             <span>Choose .xlsx file</span>
-            <input name="file" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required>
+            <span class="file-control">
+                <span class="file-select-button">Select file</span>
+                <span class="file-name" id="selected-file-name">No file selected</span>
+            </span>
+            <input class="file-input-native" id="excel-file-input" name="file" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required>
         </label>
         <button class="button button-secondary" type="submit">Import</button>
     </form>
@@ -34,6 +38,8 @@
         <a class="button button-primary" href="{{ url_for('excel.export_contacts') }}">Export contacts</a>
     </div>
 </section>
+
+<script src="{{ url_for('static', filename='excel_import.js') }}" defer></script>
 
 {% if contacts %}
     <div class="contact-grid">
