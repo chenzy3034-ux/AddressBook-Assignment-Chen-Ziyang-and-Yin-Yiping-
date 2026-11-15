@@ -7,7 +7,7 @@ SQLite storage.
 ## Features
 
 - View all contacts in a simple web interface
-- Add a contact with a name, phone number, email address, and postal address
+- Add multiple phone numbers, email addresses, social accounts, and postal addresses
 - View an individual contact
 - Edit an existing contact
 - Delete a contact after confirmation
@@ -22,6 +22,7 @@ phase.
 .
 |-- app/
 |   |-- static/
+|   |   |-- contact_methods.js
 |   |   `-- styles.css
 |   |-- templates/
 |   |   |-- base.html

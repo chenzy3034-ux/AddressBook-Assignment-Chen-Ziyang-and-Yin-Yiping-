@@ -33,8 +33,8 @@
                 <div class="avatar" aria-hidden="true">{{ contact['name'][0]|upper }}</div>
                 <div class="contact-summary">
                     <h2><a href="{{ url_for('contacts.detail', contact_id=contact['id']) }}">{{ contact['name'] }}</a></h2>
-                    {% if contact['phone'] %}<p>{{ contact['phone'] }}</p>{% endif %}
-                    {% if contact['email'] %}<p>{{ contact['email'] }}</p>{% endif %}
+                    {% if contact['primary_phone'] %}<p>{{ contact['primary_phone'] }}</p>{% endif %}
+                    {% if contact['primary_email'] %}<p>{{ contact['primary_email'] }}</p>{% endif %}
                 </div>
                 <a class="text-link" href="{{ url_for('contacts.detail', contact_id=contact['id']) }}">View</a>
             </article>

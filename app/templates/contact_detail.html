@@ -14,26 +14,31 @@
             </div>
         </div>
 
-        <dl class="detail-list">
-            <div>
-                <dt>Phone</dt>
-                <dd>{{ contact['phone'] or 'Not provided' }}</dd>
-            </div>
-            <div>
-                <dt>Email</dt>
-                <dd>
-                    {% if contact['email'] %}
-                        <a href="mailto:{{ contact['email'] }}">{{ contact['email'] }}</a>
-                    {% else %}
-                        Not provided
-                    {% endif %}
-                </dd>
-            </div>
-            <div>
-                <dt>Address</dt>
-                <dd class="preserve-lines">{{ contact['address'] or 'Not provided' }}</dd>
-            </div>
-        </dl>
+        <div class="method-sections">
+            {% for section in method_sections %}
+                {% if section['methods'] %}
+                    <section class="method-section">
+                        <h2>{{ section['title'] }}</h2>
+                        <dl class="detail-list">
+                            {% for method in section['methods'] %}
+                                <div>
+                                    <dt>{{ method['label'] }}</dt>
+                                    <dd{% if section['method_type'] == 'address' %} class="preserve-lines"{% endif %}>
+                                        {% if section['method_type'] == 'email' %}
+                                            <a href="mailto:{{ method['value'] }}">{{ method['value'] }}</a>
+                                        {% elif section['method_type'] == 'phone' %}
+                                            <a href="tel:{{ method['value'] }}">{{ method['value'] }}</a>
+                                        {% else %}
+                                            {{ method['value'] }}
+                                        {% endif %}
+                                    </dd>
+                                </div>
+                            {% endfor %}
+                        </dl>
+                    </section>
+                {% endif %}
+            {% endfor %}
+        </div>
 
         <div class="detail-actions">
             <a class="button button-primary" href="{{ url_for('contacts.edit', contact_id=contact['id']) }}">Edit contact</a>

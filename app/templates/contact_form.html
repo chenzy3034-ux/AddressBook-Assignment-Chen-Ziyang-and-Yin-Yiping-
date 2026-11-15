@@ -14,14 +14,37 @@
             <label for="name">Name <span aria-hidden="true">*</span></label>
             <input id="name" name="name" type="text" maxlength="120" value="{{ contact['name'] }}" required autofocus>
 
-            <label for="phone">Phone</label>
-            <input id="phone" name="phone" type="tel" maxlength="50" value="{{ contact['phone'] }}" placeholder="+1 555 0100">
+            <div class="method-heading">
+                <div>
+                    <h2>Contact methods</h2>
+                    <p class="form-note">Add as many phone numbers, emails, social accounts, or addresses as needed.</p>
+                </div>
+                <button class="button button-secondary" id="add-method" type="button">Add method</button>
+            </div>
 
-            <label for="email">Email</label>
-            <input id="email" name="email" type="email" maxlength="254" value="{{ contact['email'] }}" placeholder="name@example.com">
-
-            <label for="address">Address</label>
-            <textarea id="address" name="address" rows="4" maxlength="500" placeholder="Street, city, postal code">{{ contact['address'] }}</textarea>
+            <div class="method-list" id="contact-methods">
+                {% for method in methods %}
+                    <div class="method-row">
+                        <label>
+                            <span>Type</span>
+                            <select name="method_type">
+                                {% for method_type, title in method_types.items() %}
+                                    <option value="{{ method_type }}"{% if method['method_type'] == method_type %} selected{% endif %}>{{ title }}</option>
+                                {% endfor %}
+                            </select>
+                        </label>
+                        <label>
+                            <span>Label</span>
+                            <input name="method_label" type="text" maxlength="50" value="{{ method['label'] }}" placeholder="Mobile, work, personal">
+                        </label>
+                        <label class="method-value-field">
+                            <span>Value</span>
+                            <input name="method_value" type="text" maxlength="500" value="{{ method['value'] }}" placeholder="Phone, email, username, or address">
+                        </label>
+                        <button class="remove-method" type="button" aria-label="Remove contact method">Remove</button>
+                    </div>
+                {% endfor %}
+            </div>
 
             <div class="form-actions">
                 <button class="button button-primary" type="submit">Save contact</button>
@@ -30,4 +53,28 @@
         </form>
     </div>
 </div>
+
+<template id="contact-method-template">
+    <div class="method-row">
+        <label>
+            <span>Type</span>
+            <select name="method_type">
+                {% for method_type, title in method_types.items() %}
+                    <option value="{{ method_type }}">{{ title }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label>
+            <span>Label</span>
+            <input name="method_label" type="text" maxlength="50" placeholder="Mobile, work, personal">
+        </label>
+        <label class="method-value-field">
+            <span>Value</span>
+            <input name="method_value" type="text" maxlength="500" placeholder="Phone, email, username, or address">
+        </label>
+        <button class="remove-method" type="button" aria-label="Remove contact method">Remove</button>
+    </div>
+</template>
+
+<script src="{{ url_for('static', filename='contact_methods.js') }}" defer></script>
 {% endblock %}

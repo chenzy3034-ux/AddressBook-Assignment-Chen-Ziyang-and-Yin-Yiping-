@@ -5,6 +5,20 @@ from .db import get_db
 
 bp = Blueprint("contacts", __name__)
 
+METHOD_TYPES = {
+    "phone": "Phone numbers",
+    "email": "Email addresses",
+    "social": "Social media",
+    "address": "Postal addresses",
+}
+
+DEFAULT_METHOD_LABELS = {
+    "phone": "Phone",
+    "email": "Email",
+    "social": "Social",
+    "address": "Address",
+}
+
 
 def get_contact(contact_id):
     contact = get_db().execute(
@@ -17,21 +31,75 @@ def get_contact(contact_id):
     return contact
 
 
+def get_contact_methods(contact_id):
+    return get_db().execute(
+        """
+        SELECT * FROM contact_methods
+        WHERE contact_id = ?
+        ORDER BY sort_order, id
+        """,
+        (contact_id,),
+    ).fetchall()
+
+
 def validate_contact_form(form):
-    values = {
-        "name": form.get("name", "").strip(),
-        "phone": form.get("phone", "").strip(),
-        "email": form.get("email", "").strip(),
-        "address": form.get("address", "").strip(),
-    }
+    values = {"name": form.get("name", "").strip()}
+    method_types = form.getlist("method_type")
+    method_labels = form.getlist("method_label")
+    method_values = form.getlist("method_value")
+    row_count = max(len(method_types), len(method_labels), len(method_values))
+    submitted_methods = []
+
+    for index in range(row_count):
+        method = {
+            "method_type": method_types[index] if index < len(method_types) else "",
+            "label": method_labels[index].strip()
+            if index < len(method_labels)
+            else "",
+            "value": method_values[index].strip()
+            if index < len(method_values)
+            else "",
+        }
+        submitted_methods.append(method)
+
+    if not submitted_methods:
+        submitted_methods.append(
+            {"method_type": "phone", "label": "", "value": ""}
+        )
+
     errors = []
 
     if not values["name"]:
         errors.append("Name is required.")
-    if not any((values["phone"], values["email"], values["address"])):
+
+    methods = [method for method in submitted_methods if method["value"]]
+    if not methods:
         errors.append("At least one contact method is required.")
 
-    return values, errors
+    if any(method["method_type"] not in METHOD_TYPES for method in methods):
+        errors.append("Select a valid contact method type.")
+
+    return values, submitted_methods, methods, errors
+
+
+def insert_contact_methods(database, contact_id, methods):
+    database.executemany(
+        """
+        INSERT INTO contact_methods
+            (contact_id, method_type, label, value, sort_order)
+        VALUES (?, ?, ?, ?, ?)
+        """,
+        [
+            (
+                contact_id,
+                method["method_type"],
+                method["label"],
+                method["value"],
+                sort_order,
+            )
+            for sort_order, method in enumerate(methods)
+        ],
+    )
 
 
 @bp.route("/")
@@ -40,10 +108,23 @@ def index():
     if active_filter not in ("all", "favorites"):
         active_filter = "all"
 
-    query = "SELECT * FROM contacts"
+    query = """
+        SELECT contacts.*,
+            (
+                SELECT value FROM contact_methods
+                WHERE contact_id = contacts.id AND method_type = 'phone'
+                ORDER BY sort_order, id LIMIT 1
+            ) AS primary_phone,
+            (
+                SELECT value FROM contact_methods
+                WHERE contact_id = contacts.id AND method_type = 'email'
+                ORDER BY sort_order, id LIMIT 1
+            ) AS primary_email
+        FROM contacts
+    """
     if active_filter == "favorites":
-        query += " WHERE is_favorite = 1"
-    query += " ORDER BY name COLLATE NOCASE, id"
+        query += " WHERE contacts.is_favorite = 1"
+    query += " ORDER BY contacts.name COLLATE NOCASE, contacts.id"
 
     contacts = get_db().execute(query).fetchall()
     return render_template(
@@ -53,21 +134,22 @@ def index():
 
 @bp.route("/contacts/new", methods=("GET", "POST"))
 def create():
-    values = {"name": "", "phone": "", "email": "", "address": ""}
+    values = {"name": ""}
+    methods = [{"method_type": "phone", "label": "", "value": ""}]
 
     if request.method == "POST":
-        values, errors = validate_contact_form(request.form)
+        values, submitted_methods, valid_methods, errors = validate_contact_form(
+            request.form
+        )
+        methods = submitted_methods
 
         if not errors:
             database = get_db()
-            cursor = database.execute(
-                """
-                INSERT INTO contacts (name, phone, email, address)
-                VALUES (?, ?, ?, ?)
-                """,
-                (values["name"], values["phone"], values["email"], values["address"]),
-            )
-            database.commit()
+            with database:
+                cursor = database.execute(
+                    "INSERT INTO contacts (name) VALUES (?)", (values["name"],)
+                )
+                insert_contact_methods(database, cursor.lastrowid, valid_methods)
             flash("Contact created successfully.", "success")
             return redirect(url_for("contacts.detail", contact_id=cursor.lastrowid))
 
@@ -75,13 +157,37 @@ def create():
             flash(error, "error")
 
     return render_template(
-        "contact_form.html", contact=values, page_title="Add contact"
+        "contact_form.html",
+        contact=values,
+        methods=methods,
+        method_types=METHOD_TYPES,
+        page_title="Add contact",
     )
 
 
 @bp.route("/contacts/<int:contact_id>")
 def detail(contact_id):
-    return render_template("contact_detail.html", contact=get_contact(contact_id))
+    contact = get_contact(contact_id)
+    methods = get_contact_methods(contact_id)
+    method_sections = [
+        {
+            "method_type": method_type,
+            "title": title,
+            "methods": [
+                {
+                    "label": method["label"]
+                    or DEFAULT_METHOD_LABELS[method_type],
+                    "value": method["value"],
+                }
+                for method in methods
+                if method["method_type"] == method_type
+            ],
+        }
+        for method_type, title in METHOD_TYPES.items()
+    ]
+    return render_template(
+        "contact_detail.html", contact=contact, method_sections=method_sections
+    )
 
 
 @bp.route("/contacts/<int:contact_id>/favorite", methods=("POST",))
@@ -114,28 +220,32 @@ def toggle_favorite(contact_id):
 def edit(contact_id):
     contact = get_contact(contact_id)
     values = dict(contact)
+    methods = get_contact_methods(contact_id)
+    if not methods:
+        methods = [{"method_type": "phone", "label": "", "value": ""}]
 
     if request.method == "POST":
-        values, errors = validate_contact_form(request.form)
+        values, submitted_methods, valid_methods, errors = validate_contact_form(
+            request.form
+        )
+        methods = submitted_methods
 
         if not errors:
             database = get_db()
-            database.execute(
-                """
-                UPDATE contacts
-                SET name = ?, phone = ?, email = ?, address = ?,
-                    updated_at = CURRENT_TIMESTAMP
-                WHERE id = ?
-                """,
-                (
-                    values["name"],
-                    values["phone"],
-                    values["email"],
-                    values["address"],
-                    contact_id,
-                ),
-            )
-            database.commit()
+            with database:
+                database.execute(
+                    """
+                    UPDATE contacts
+                    SET name = ?, updated_at = CURRENT_TIMESTAMP
+                    WHERE id = ?
+                    """,
+                    (values["name"], contact_id),
+                )
+                database.execute(
+                    "DELETE FROM contact_methods WHERE contact_id = ?",
+                    (contact_id,),
+                )
+                insert_contact_methods(database, contact_id, valid_methods)
             flash("Contact updated successfully.", "success")
             return redirect(url_for("contacts.detail", contact_id=contact_id))
 
@@ -143,7 +253,11 @@ def edit(contact_id):
             flash(error, "error")
 
     return render_template(
-        "contact_form.html", contact=values, page_title="Edit contact"
+        "contact_form.html",
+        contact=values,
+        methods=methods,
+        method_types=METHOD_TYPES,
+        page_title="Edit contact",
     )
 
 
