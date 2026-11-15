@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}{{ contact['name'] }} | Address Book{% endblock %}
+
+{% block content %}
+<div class="narrow-page">
+    <a class="back-link" href="{{ url_for('contacts.index') }}">&larr; Back to contacts</a>
+    <article class="panel contact-detail">
+        <div class="detail-header">
+            <div class="avatar avatar-large" aria-hidden="true">{{ contact['name'][0]|upper }}</div>
+            <div>
+                <p class="eyebrow">Contact</p>
+                <h1>{{ contact['name'] }}</h1>
+            </div>
+        </div>
+
+        <dl class="detail-list">
+            <div>
+                <dt>Phone</dt>
+                <dd>{{ contact['phone'] or 'Not provided' }}</dd>
+            </div>
+            <div>
+                <dt>Email</dt>
+                <dd>
+                    {% if contact['email'] %}
+                        <a href="mailto:{{ contact['email'] }}">{{ contact['email'] }}</a>
+                    {% else %}
+                        Not provided
+                    {% endif %}
+                </dd>
+            </div>
+            <div>
+                <dt>Address</dt>
+                <dd class="preserve-lines">{{ contact['address'] or 'Not provided' }}</dd>
+            </div>
+        </dl>
+
+        <div class="detail-actions">
+            <a class="button button-primary" href="{{ url_for('contacts.edit', contact_id=contact['id']) }}">Edit contact</a>
+            <form method="post" action="{{ url_for('contacts.delete', contact_id=contact['id']) }}" onsubmit="return confirm('Delete this contact?');">
+                <button class="button button-danger" type="submit">Delete contact</button>
+            </form>
+        </div>
+    </article>
+</div>
+{% endblock %}

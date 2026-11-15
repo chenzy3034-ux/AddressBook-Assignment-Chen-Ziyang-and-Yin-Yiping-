@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}Page not found | Address Book{% endblock %}
+
+{% block content %}
+<section class="empty-state">
+    <p class="eyebrow">Error 404</p>
+    <h1>Page not found</h1>
+    <p>The page or contact you requested does not exist.</p>
+    <a class="button button-primary" href="{{ url_for('contacts.index') }}">Return to contacts</a>
+</section>
+{% endblock %}

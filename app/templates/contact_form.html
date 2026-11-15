@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page_title }} | Address Book{% endblock %}
+
+{% block content %}
+<div class="narrow-page">
+    <a class="back-link" href="{{ url_for('contacts.index') }}">&larr; Back to contacts</a>
+    <div class="panel">
+        <p class="eyebrow">Contact details</p>
+        <h1>{{ page_title }}</h1>
+        <p class="form-note">A name and at least one contact method are required.</p>
+
+        <form method="post" class="contact-form">
+            <label for="name">Name <span aria-hidden="true">*</span></label>
+            <input id="name" name="name" type="text" maxlength="120" value="{{ contact['name'] }}" required autofocus>
+
+            <label for="phone">Phone</label>
+            <input id="phone" name="phone" type="tel" maxlength="50" value="{{ contact['phone'] }}" placeholder="+1 555 0100">
+
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" maxlength="254" value="{{ contact['email'] }}" placeholder="name@example.com">
+
+            <label for="address">Address</label>
+            <textarea id="address" name="address" rows="4" maxlength="500" placeholder="Street, city, postal code">{{ contact['address'] }}</textarea>
+
+            <div class="form-actions">
+                <button class="button button-primary" type="submit">Save contact</button>
+                <a class="button button-secondary" href="{{ url_for('contacts.index') }}">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

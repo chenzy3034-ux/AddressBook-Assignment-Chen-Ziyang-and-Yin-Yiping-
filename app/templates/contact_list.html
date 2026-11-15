@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Contacts | Address Book{% endblock %}
+
+{% block content %}
+<div class="page-heading">
+    <div>
+        <p class="eyebrow">Contact directory</p>
+        <h1>Contacts</h1>
+        <p class="subtitle">Keep essential contact details in one place.</p>
+    </div>
+    <span class="contact-count">{{ contacts|length }} contact{% if contacts|length != 1 %}s{% endif %}</span>
+</div>
+
+{% if contacts %}
+    <div class="contact-grid">
+        {% for contact in contacts %}
+            <article class="contact-card">
+                <div class="avatar" aria-hidden="true">{{ contact['name'][0]|upper }}</div>
+                <div class="contact-summary">
+                    <h2><a href="{{ url_for('contacts.detail', contact_id=contact['id']) }}">{{ contact['name'] }}</a></h2>
+                    {% if contact['phone'] %}<p>{{ contact['phone'] }}</p>{% endif %}
+                    {% if contact['email'] %}<p>{{ contact['email'] }}</p>{% endif %}
+                </div>
+                <a class="text-link" href="{{ url_for('contacts.detail', contact_id=contact['id']) }}">View</a>
+            </article>
+        {% endfor %}
+    </div>
+{% else %}
+    <section class="empty-state">
+        <div class="empty-icon" aria-hidden="true">+</div>
+        <h2>No contacts yet</h2>
+        <p>Add your first contact to start building your address book.</p>
+        <a class="button button-primary" href="{{ url_for('contacts.create') }}">Add first contact</a>
+    </section>
+{% endif %}
+{% endblock %}
