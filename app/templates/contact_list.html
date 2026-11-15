@@ -17,6 +17,24 @@
     <a class="filter-link{% if active_filter == 'favorites' %} active{% endif %}" href="{{ url_for('contacts.index', filter='favorites') }}">Favorite contacts</a>
 </nav>
 
+<section class="excel-actions" aria-label="Excel import and export">
+    <div>
+        <h2>Excel</h2>
+        <p>Import or export contacts using the compatible workbook format.</p>
+    </div>
+    <form class="import-form" method="post" action="{{ url_for('excel.import_contacts_route') }}" enctype="multipart/form-data">
+        <label class="file-picker">
+            <span>Choose .xlsx file</span>
+            <input name="file" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required>
+        </label>
+        <button class="button button-secondary" type="submit">Import</button>
+    </form>
+    <div class="excel-links">
+        <a class="button button-secondary" href="{{ url_for('static', filename='examples/address_book_import_example.xlsx') }}" download>Download example</a>
+        <a class="button button-primary" href="{{ url_for('excel.export_contacts') }}">Export contacts</a>
+    </div>
+</section>
+
 {% if contacts %}
     <div class="contact-grid">
         {% for contact in contacts %}

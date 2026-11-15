@@ -23,6 +23,10 @@ def create_app(test_config=None):
 
     app.register_blueprint(bp)
 
+    from .excel import bp as excel_bp
+
+    app.register_blueprint(excel_bp)
+
     with app.app_context():
         db.init_db()
 

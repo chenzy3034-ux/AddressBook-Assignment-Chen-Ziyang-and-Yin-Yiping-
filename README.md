@@ -12,9 +12,9 @@ SQLite storage.
 - Edit an existing contact
 - Delete a contact after confirmation
 - Keep data in a local SQLite database between application restarts
+- Import and export complete contact records as Excel workbooks
 
-Favorite contacts and Excel import/export are intentionally excluded from this
-phase.
+Excel workbooks preserve favorite status and all numbered contact methods.
 
 ## Project Structure
 
@@ -22,6 +22,8 @@ phase.
 .
 |-- app/
 |   |-- static/
+|   |   |-- examples/
+|   |   |   `-- address_book_import_example.xlsx
 |   |   |-- contact_methods.js
 |   |   `-- styles.css
 |   |-- templates/
@@ -33,10 +35,12 @@ phase.
 |   |-- __init__.py
 |   |-- contacts.py
 |   |-- db.py
+|   |-- excel.py
 |   `-- schema.sql
 |-- tests/
 |   |-- conftest.py
-|   `-- test_contacts.py
+|   |-- test_contacts.py
+|   `-- test_excel.py
 |-- .gitignore
 |-- requirements.txt
 `-- run.py
@@ -78,3 +82,21 @@ database at `instance/address_book.sqlite` automatically on first startup.
 ```bash
 python -m pytest
 ```
+
+## Excel Workbook Format
+
+The `Contacts` worksheet uses one row per contact. `Name` and `Favorite` are
+required columns. Favorite values accept `Yes`, `No`, `True`, `False`, `1`, or
+`0`.
+
+Contact methods use numbered pairs of columns:
+
+- `Phone 1 Label`, `Phone 1`, `Phone 2 Label`, `Phone 2`, and so on
+- `Email 1 Label`, `Email 1`, `Email 2 Label`, `Email 2`, and so on
+- `Social 1 Label`, `Social 1`, `Social 2 Label`, `Social 2`, and so on
+- `Address 1 Label`, `Address 1`, `Address 2 Label`, `Address 2`, and so on
+
+Empty method cells are ignored. Import requires a name and at least one contact
+method per row. A row is treated as a duplicate when its normalized name and
+complete set of method types and values match an existing or earlier imported
+contact. Duplicate rows are skipped rather than merged or inserted again.
