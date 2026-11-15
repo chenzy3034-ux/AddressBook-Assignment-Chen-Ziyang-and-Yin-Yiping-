@@ -12,10 +12,24 @@
     <span class="contact-count">{{ contacts|length }} contact{% if contacts|length != 1 %}s{% endif %}</span>
 </div>
 
+<nav class="contact-filters" aria-label="Contact filters">
+    <a class="filter-link{% if active_filter == 'all' %} active{% endif %}" href="{{ url_for('contacts.index', filter='all') }}">All contacts</a>
+    <a class="filter-link{% if active_filter == 'favorites' %} active{% endif %}" href="{{ url_for('contacts.index', filter='favorites') }}">Favorite contacts</a>
+</nav>
+
 {% if contacts %}
     <div class="contact-grid">
         {% for contact in contacts %}
             <article class="contact-card">
+                <form method="post" action="{{ url_for('contacts.toggle_favorite', contact_id=contact['id']) }}">
+                    <input type="hidden" name="filter" value="{{ active_filter }}">
+                    <button
+                        class="favorite-button{% if contact['is_favorite'] %} is-favorite{% endif %}"
+                        type="submit"
+                        aria-label="{% if contact['is_favorite'] %}Remove {{ contact['name'] }} from favorites{% else %}Add {{ contact['name'] }} to favorites{% endif %}"
+                        title="{% if contact['is_favorite'] %}Remove from favorites{% else %}Add to favorites{% endif %}"
+                    >{% if contact['is_favorite'] %}&#9733;{% else %}&#9734;{% endif %}</button>
+                </form>
                 <div class="avatar" aria-hidden="true">{{ contact['name'][0]|upper }}</div>
                 <div class="contact-summary">
                     <h2><a href="{{ url_for('contacts.detail', contact_id=contact['id']) }}">{{ contact['name'] }}</a></h2>
@@ -28,10 +42,17 @@
     </div>
 {% else %}
     <section class="empty-state">
-        <div class="empty-icon" aria-hidden="true">+</div>
-        <h2>No contacts yet</h2>
-        <p>Add your first contact to start building your address book.</p>
-        <a class="button button-primary" href="{{ url_for('contacts.create') }}">Add first contact</a>
+        {% if active_filter == 'favorites' %}
+            <div class="empty-icon" aria-hidden="true">&#9734;</div>
+            <h2>No favorite contacts</h2>
+            <p>Select the star beside a contact to add it to your favorites.</p>
+            <a class="button button-secondary" href="{{ url_for('contacts.index', filter='all') }}">View all contacts</a>
+        {% else %}
+            <div class="empty-icon" aria-hidden="true">+</div>
+            <h2>No contacts yet</h2>
+            <p>Add your first contact to start building your address book.</p>
+            <a class="button button-primary" href="{{ url_for('contacts.create') }}">Add first contact</a>
+        {% endif %}
     </section>
 {% endif %}
 {% endblock %}

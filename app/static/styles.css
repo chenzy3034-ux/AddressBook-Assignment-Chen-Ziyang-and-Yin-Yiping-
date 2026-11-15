@@ -115,9 +115,33 @@ h2 {
     gap: 14px;
 }
 
+.contact-filters {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.filter-link {
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 0.92rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.filter-link:hover,
+.filter-link.active {
+    border-color: var(--primary);
+    background: #e9edff;
+    color: var(--primary);
+}
+
 .contact-card {
     display: grid;
-    grid-template-columns: auto 1fr auto;
+    grid-template-columns: auto auto 1fr auto;
     align-items: center;
     gap: 18px;
     padding: 20px;
@@ -125,6 +149,34 @@ h2 {
     border-radius: 16px;
     background: var(--surface);
     box-shadow: 0 5px 18px rgba(30, 45, 75, 0.04);
+}
+
+.favorite-button {
+    display: grid;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    place-items: center;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: var(--surface);
+    color: #7d8799;
+    font-size: 1.55rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.favorite-button:hover,
+.favorite-button:focus-visible {
+    border-color: #e0a100;
+    color: #c68b00;
+    outline: 3px solid rgba(224, 161, 0, 0.16);
+}
+
+.favorite-button.is-favorite {
+    border-color: #f2c94c;
+    background: #fff8d8;
+    color: #d49300;
 }
 
 .contact-card h2 {
@@ -352,11 +404,11 @@ textarea {
     }
 
     .contact-card {
-        grid-template-columns: auto 1fr;
+        grid-template-columns: auto auto 1fr;
     }
 
     .contact-card .text-link {
-        grid-column: 2;
+        grid-column: 3;
     }
 
     .detail-list > div {

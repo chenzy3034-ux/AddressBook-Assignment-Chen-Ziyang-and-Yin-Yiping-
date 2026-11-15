@@ -36,10 +36,19 @@ def validate_contact_form(form):
 
 @bp.route("/")
 def index():
-    contacts = get_db().execute(
-        "SELECT * FROM contacts ORDER BY name COLLATE NOCASE, id"
-    ).fetchall()
-    return render_template("contact_list.html", contacts=contacts)
+    active_filter = request.args.get("filter", "all")
+    if active_filter not in ("all", "favorites"):
+        active_filter = "all"
+
+    query = "SELECT * FROM contacts"
+    if active_filter == "favorites":
+        query += " WHERE is_favorite = 1"
+    query += " ORDER BY name COLLATE NOCASE, id"
+
+    contacts = get_db().execute(query).fetchall()
+    return render_template(
+        "contact_list.html", contacts=contacts, active_filter=active_filter
+    )
 
 
 @bp.route("/contacts/new", methods=("GET", "POST"))
@@ -73,6 +82,32 @@ def create():
 @bp.route("/contacts/<int:contact_id>")
 def detail(contact_id):
     return render_template("contact_detail.html", contact=get_contact(contact_id))
+
+
+@bp.route("/contacts/<int:contact_id>/favorite", methods=("POST",))
+def toggle_favorite(contact_id):
+    contact = get_contact(contact_id)
+    is_favorite = 0 if contact["is_favorite"] else 1
+    database = get_db()
+    database.execute(
+        """
+        UPDATE contacts
+        SET is_favorite = ?, updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+        """,
+        (is_favorite, contact_id),
+    )
+    database.commit()
+
+    if is_favorite:
+        flash(f"{contact['name']} was added to favorites.", "success")
+    else:
+        flash(f"{contact['name']} was removed from favorites.", "success")
+
+    active_filter = request.form.get("filter", "all")
+    if active_filter not in ("all", "favorites"):
+        active_filter = "all"
+    return redirect(url_for("contacts.index", filter=active_filter))
 
 
 @bp.route("/contacts/<int:contact_id>/edit", methods=("GET", "POST"))

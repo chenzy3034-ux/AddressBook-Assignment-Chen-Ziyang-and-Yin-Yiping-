@@ -25,6 +25,15 @@ def init_db():
     with current_app.open_resource("schema.sql") as schema_file:
         database.executescript(schema_file.read().decode("utf-8"))
 
+    columns = {
+        column["name"] for column in database.execute("PRAGMA table_info(contacts)")
+    }
+    if "is_favorite" not in columns:
+        database.execute(
+            "ALTER TABLE contacts ADD COLUMN is_favorite INTEGER NOT NULL DEFAULT 0"
+        )
+        database.commit()
+
 
 @click.command("init-db")
 def init_db_command():

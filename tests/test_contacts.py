@@ -89,6 +89,74 @@ def test_missing_contact_returns_not_found(client):
     assert b"Page not found" in response.data
 
 
+def test_toggle_favorite_on_and_off(client, database):
+    create_contact(client)
+    contact_id = database.execute("SELECT id FROM contacts").fetchone()["id"]
+
+    favorite_response = client.post(
+        f"/contacts/{contact_id}/favorite",
+        data={"filter": "all"},
+        follow_redirects=True,
+    )
+
+    assert favorite_response.status_code == 200
+    assert b"Ada Lovelace was added to favorites." in favorite_response.data
+    assert database.execute(
+        "SELECT is_favorite FROM contacts WHERE id = ?", (contact_id,)
+    ).fetchone()["is_favorite"] == 1
+
+    unfavorite_response = client.post(
+        f"/contacts/{contact_id}/favorite",
+        data={"filter": "all"},
+        follow_redirects=True,
+    )
+
+    assert b"Ada Lovelace was removed from favorites." in unfavorite_response.data
+    assert database.execute(
+        "SELECT is_favorite FROM contacts WHERE id = ?", (contact_id,)
+    ).fetchone()["is_favorite"] == 0
+
+
+def test_filter_favorite_contacts(client, database):
+    create_contact(client)
+    create_contact(
+        client,
+        name="Grace Hopper",
+        phone="555-0199",
+        email="grace@example.com",
+    )
+    favorite_id = database.execute(
+        "SELECT id FROM contacts WHERE name = ?", ("Ada Lovelace",)
+    ).fetchone()["id"]
+    client.post(f"/contacts/{favorite_id}/favorite")
+
+    response = client.get("/?filter=favorites")
+
+    assert response.status_code == 200
+    assert b"Ada Lovelace" in response.data
+    assert b"Grace Hopper" not in response.data
+    assert b"Favorite contacts" in response.data
+
+
+def test_favorite_status_persists_between_app_contexts(application):
+    from app.db import get_db
+
+    with application.app_context():
+        database = get_db()
+        cursor = database.execute(
+            "INSERT INTO contacts (name, phone, is_favorite) VALUES (?, ?, ?)",
+            ("Favorite Contact", "555-0133", 1),
+        )
+        contact_id = cursor.lastrowid
+        database.commit()
+
+    with application.app_context():
+        contact = get_db().execute(
+            "SELECT is_favorite FROM contacts WHERE id = ?", (contact_id,)
+        ).fetchone()
+        assert contact["is_favorite"] == 1
+
+
 def test_database_persists_between_app_contexts(application):
     from app.db import get_db
 
