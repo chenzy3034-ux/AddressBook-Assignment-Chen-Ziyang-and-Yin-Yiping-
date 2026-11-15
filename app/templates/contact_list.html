@@ -9,13 +9,28 @@
         <h1>Contacts</h1>
         <p class="subtitle">Keep essential contact details in one place.</p>
     </div>
-    <span class="contact-count">{{ contacts|length }} contact{% if contacts|length != 1 %}s{% endif %}</span>
+    <span class="contact-count">{{ contacts|length }} result{% if contacts|length != 1 %}s{% endif %}</span>
 </div>
 
-<nav class="contact-filters" aria-label="Contact filters">
-    <a class="filter-link{% if active_filter == 'all' %} active{% endif %}" href="{{ url_for('contacts.index', filter='all') }}">All contacts</a>
-    <a class="filter-link{% if active_filter == 'favorites' %} active{% endif %}" href="{{ url_for('contacts.index', filter='favorites') }}">Favorite contacts</a>
-</nav>
+<section class="directory-tools" aria-label="Contact search and filters">
+    <form class="search-form" method="get" action="{{ url_for('contacts.index') }}">
+        <input name="filter" type="hidden" value="{{ active_filter }}">
+        <label class="search-field">
+            <span class="search-icon" aria-hidden="true">&#128269;</span>
+            <span class="visually-hidden">Search contacts</span>
+            <input name="q" type="search" maxlength="120" value="{{ search_query }}" placeholder="Search by name or contact details">
+        </label>
+        <button class="button button-primary" type="submit">Search</button>
+        {% if search_query %}
+            <a class="button button-secondary" href="{{ url_for('contacts.index', filter=active_filter) }}">Clear</a>
+        {% endif %}
+    </form>
+
+    <nav class="contact-filters" aria-label="Contact filters">
+        <a class="filter-link{% if active_filter == 'all' %} active{% endif %}" href="{{ url_for('contacts.index', filter='all', q=search_query) }}">All contacts</a>
+        <a class="filter-link{% if active_filter == 'favorites' %} active{% endif %}" href="{{ url_for('contacts.index', filter='favorites', q=search_query) }}">Favorite contacts</a>
+    </nav>
+</section>
 
 <section class="excel-actions" aria-label="Excel import and export">
     <div>
@@ -47,6 +62,7 @@
             <article class="contact-card">
                 <form method="post" action="{{ url_for('contacts.toggle_favorite', contact_id=contact['id']) }}">
                     <input type="hidden" name="filter" value="{{ active_filter }}">
+                    <input type="hidden" name="q" value="{{ search_query }}">
                     <button
                         class="favorite-button{% if contact['is_favorite'] %} is-favorite{% endif %}"
                         type="submit"
@@ -66,7 +82,12 @@
     </div>
 {% else %}
     <section class="empty-state">
-        {% if active_filter == 'favorites' %}
+        {% if search_query %}
+            <div class="empty-icon" aria-hidden="true">?</div>
+            <h2>No matching contacts</h2>
+            <p>Try a different name, phone number, email, label, or address.</p>
+            <a class="button button-secondary" href="{{ url_for('contacts.index', filter=active_filter) }}">Clear search</a>
+        {% elif active_filter == 'favorites' %}
             <div class="empty-icon" aria-hidden="true">&#9734;</div>
             <h2>No favorite contacts</h2>
             <p>Select the star beside a contact to add it to your favorites.</p>

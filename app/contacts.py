@@ -107,6 +107,7 @@ def index():
     active_filter = request.args.get("filter", "all")
     if active_filter not in ("all", "favorites"):
         active_filter = "all"
+    search_query = request.args.get("q", "").strip()[:120]
 
     query = """
         SELECT contacts.*,
@@ -122,13 +123,43 @@ def index():
             ) AS primary_email
         FROM contacts
     """
+    conditions = []
+    parameters = []
     if active_filter == "favorites":
-        query += " WHERE contacts.is_favorite = 1"
+        conditions.append("contacts.is_favorite = 1")
+    if search_query:
+        escaped_query = (
+            search_query.replace("\\", "\\\\")
+            .replace("%", "\\%")
+            .replace("_", "\\_")
+        )
+        search_pattern = f"%{escaped_query}%"
+        conditions.append(
+            """
+            (
+                contacts.name LIKE ? ESCAPE '\\' COLLATE NOCASE
+                OR EXISTS (
+                    SELECT 1 FROM contact_methods AS search_methods
+                    WHERE search_methods.contact_id = contacts.id
+                    AND (
+                        search_methods.value LIKE ? ESCAPE '\\' COLLATE NOCASE
+                        OR search_methods.label LIKE ? ESCAPE '\\' COLLATE NOCASE
+                    )
+                )
+            )
+            """
+        )
+        parameters.extend([search_pattern, search_pattern, search_pattern])
+    if conditions:
+        query += " WHERE " + " AND ".join(conditions)
     query += " ORDER BY contacts.name COLLATE NOCASE, contacts.id"
 
-    contacts = get_db().execute(query).fetchall()
+    contacts = get_db().execute(query, parameters).fetchall()
     return render_template(
-        "contact_list.html", contacts=contacts, active_filter=active_filter
+        "contact_list.html",
+        contacts=contacts,
+        active_filter=active_filter,
+        search_query=search_query,
     )
 
 
@@ -213,7 +244,10 @@ def toggle_favorite(contact_id):
     active_filter = request.form.get("filter", "all")
     if active_filter not in ("all", "favorites"):
         active_filter = "all"
-    return redirect(url_for("contacts.index", filter=active_filter))
+    search_query = request.form.get("q", "").strip()[:120]
+    return redirect(
+        url_for("contacts.index", filter=active_filter, q=search_query)
+    )
 
 
 @bp.route("/contacts/<int:contact_id>/edit", methods=("GET", "POST"))

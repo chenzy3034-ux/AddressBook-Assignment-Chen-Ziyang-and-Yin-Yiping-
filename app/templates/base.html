@@ -3,13 +3,18 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#3157d5">
     <title>{% block title %}Address Book{% endblock %}</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
     <header class="site-header">
         <div class="container header-content">
-            <a class="brand" href="{{ url_for('contacts.index') }}">Address Book</a>
+            <a class="brand" href="{{ url_for('contacts.index') }}">
+                <span class="brand-mark" aria-hidden="true">AB</span>
+                <span>Address Book</span>
+            </a>
             <a class="button button-primary" href="{{ url_for('contacts.create') }}">Add contact</a>
         </div>
     </header>
@@ -17,7 +22,7 @@
     <main class="container main-content">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
-                <div class="messages" aria-live="polite">
+                <div class="messages" aria-live="polite" role="status">
                     {% for category, message in messages %}
                         <div class="message message-{{ category }}">{{ message }}</div>
                     {% endfor %}

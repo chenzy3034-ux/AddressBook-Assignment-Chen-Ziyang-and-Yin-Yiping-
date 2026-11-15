@@ -7,6 +7,7 @@ SQLite storage.
 ## Features
 
 - View all contacts in a simple web interface
+- Search contacts by name, contact details, or labels
 - Add multiple phone numbers, email addresses, social accounts, and postal addresses
 - View an individual contact
 - Edit an existing contact
@@ -25,6 +26,7 @@ Excel workbooks preserve favorite status and all numbered contact methods.
 |   |   |-- examples/
 |   |   |   `-- address_book_import_example.xlsx
 |   |   |-- contact_methods.js
+|   |   |-- favicon.svg
 |   |   `-- styles.css
 |   |-- templates/
 |   |   |-- base.html

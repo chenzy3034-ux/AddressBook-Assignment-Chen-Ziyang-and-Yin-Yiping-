@@ -11,6 +11,9 @@
             <div>
                 <p class="eyebrow">Contact</p>
                 <h1>{{ contact['name'] }}</h1>
+                {% if contact['is_favorite'] %}
+                    <span class="favorite-badge">&#9733; Favorite contact</span>
+                {% endif %}
             </div>
         </div>
 

@@ -189,6 +189,45 @@ def test_filter_favorite_contacts(client, database):
     assert b"Favorite contacts" in response.data
 
 
+def test_search_finds_name_and_contact_method(client):
+    create_contact(client)
+    create_contact(
+        client,
+        name="Grace Hopper",
+        method_type=["phone", "email"],
+        method_label=["Office", "Work"],
+        method_value=["555-0199", "grace@example.com"],
+    )
+
+    name_response = client.get("/?q=grace")
+    email_response = client.get("/?q=ada%40example.com")
+
+    assert name_response.status_code == 200
+    assert b"Grace Hopper" in name_response.data
+    assert b"Ada Lovelace" not in name_response.data
+    assert b"Ada Lovelace" in email_response.data
+    assert b"Grace Hopper" not in email_response.data
+
+
+def test_search_combines_with_favorite_filter_and_handles_no_results(
+    client, database
+):
+    create_contact(client)
+    create_contact(client, name="Grace Hopper")
+    ada_id = database.execute(
+        "SELECT id FROM contacts WHERE name = ?", ("Ada Lovelace",)
+    ).fetchone()["id"]
+    client.post(f"/contacts/{ada_id}/favorite")
+
+    favorite_response = client.get("/?filter=favorites&q=Ada")
+    no_results_response = client.get("/?filter=favorites&q=Grace")
+
+    assert b"Ada Lovelace" in favorite_response.data
+    assert b"Grace Hopper" not in favorite_response.data
+    assert b"No matching contacts" in no_results_response.data
+    assert b"Clear search" in no_results_response.data
+
+
 def test_favorite_status_persists_between_app_contexts(application):
     from app.db import get_db
 
