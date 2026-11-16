@@ -1,5 +1,5 @@
 document.querySelector("#delete-contact").addEventListener("submit", (event) => {
-    if (!window.confirm("Delete this contact?")) {
+    if (!window.confirm(event.currentTarget.dataset.confirm)) {
         event.preventDefault();
     }
 });

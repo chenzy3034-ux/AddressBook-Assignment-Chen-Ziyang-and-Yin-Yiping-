@@ -10,6 +10,7 @@ from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import get_column_letter
 
 from .db import get_db
+from .i18n import translate
 
 
 bp = Blueprint("excel", __name__)
@@ -166,7 +167,7 @@ def parse_favorite(value):
         return 1
     if normalized in ("", "no", "false", "0", "not favorite"):
         return 0
-    raise ValueError("Favorite must be Yes or No.")
+    raise ValueError(translate("Favorite must be Yes or No."))
 
 
 def parse_import_workbook(file_bytes):
@@ -176,7 +177,7 @@ def parse_import_workbook(file_bytes):
             len(entries) > MAX_ARCHIVE_ENTRIES
             or sum(entry.file_size for entry in entries) > MAX_EXPANDED_SIZE
         ):
-            raise ValueError("The workbook is too large after decompression.")
+            raise ValueError(translate("The workbook is too large after decompression."))
 
     workbook = load_workbook(
         filename=BytesIO(file_bytes), read_only=True, data_only=True, keep_links=False
@@ -186,14 +187,14 @@ def parse_import_workbook(file_bytes):
     row_iterator = worksheet.iter_rows()
     header_cells = next(row_iterator, None)
     if header_cells is None:
-        raise ValueError("The workbook is empty.")
+        raise ValueError(translate("The workbook is empty."))
     header_values = [normalize_text(cell.value) for cell in header_cells]
     if len(header_values) != len(set(header_values)):
-        raise ValueError("The workbook contains duplicate column headers.")
+        raise ValueError(translate("The workbook contains duplicate column headers."))
 
     header_indexes = {header: index for index, header in enumerate(header_values)}
     if "Name" not in header_indexes or "Favorite" not in header_indexes:
-        raise ValueError("The workbook must contain Name and Favorite columns.")
+        raise ValueError(translate("The workbook must contain Name and Favorite columns."))
 
     method_columns = defaultdict(dict)
     unknown_headers = []
@@ -211,16 +212,18 @@ def parse_import_workbook(file_bytes):
         method_columns[(method_type, method_number)][field] = index
 
     if unknown_headers:
-        raise ValueError(f"Unsupported column header: {unknown_headers[0]}.")
+        raise ValueError(
+            translate("Unsupported column header: {header}.", header=unknown_headers[0])
+        )
     if not any("value" in columns for columns in method_columns.values()):
-        raise ValueError("The workbook must contain at least one contact method column.")
+        raise ValueError(translate("The workbook must contain at least one contact method column."))
 
     contacts = []
     invalid_rows = []
     for row_number, cells in enumerate(row_iterator, start=2):
         if row_number - 1 > MAX_IMPORT_ROWS:
             raise ValueError(
-                f"The workbook cannot contain more than {MAX_IMPORT_ROWS} rows."
+                translate("The workbook cannot contain more than {count} rows.", count=MAX_IMPORT_ROWS)
             )
         values = [cell.value for cell in cells]
         if not any(normalize_text(value) for value in values):
@@ -230,7 +233,7 @@ def parse_import_workbook(file_bytes):
         try:
             is_favorite = parse_favorite(values[header_indexes["Favorite"]])
         except ValueError as error:
-            invalid_rows.append(f"Row {row_number}: {error}")
+            invalid_rows.append(translate("Row {row}: {reason}", row=row_number, reason=error))
             continue
 
         methods = []
@@ -261,10 +264,16 @@ def parse_import_workbook(file_bytes):
             )
 
         if not name:
-            invalid_rows.append(f"Row {row_number}: Name is required.")
+            invalid_rows.append(
+                translate("Row {row}: {reason}", row=row_number, reason=translate("Name is required."))
+            )
         elif not methods:
             invalid_rows.append(
-                f"Row {row_number}: At least one contact method is required."
+                translate(
+                    "Row {row}: {reason}",
+                    row=row_number,
+                    reason=translate("At least one contact method is required."),
+                )
             )
         else:
             contacts.append(
@@ -330,28 +339,36 @@ def export_contacts():
 def import_contacts_route():
     uploaded_file = request.files.get("file")
     if uploaded_file is None or not uploaded_file.filename:
-        flash("Choose an Excel file to import.", "error")
+        flash(translate("Choose an Excel file to import."), "error")
         return redirect(url_for("contacts.index"))
     if not uploaded_file.filename.lower().endswith(".xlsx"):
-        flash("Only .xlsx files are supported.", "error")
+        flash(translate("Only .xlsx files are supported."), "error")
         return redirect(url_for("contacts.index"))
 
     file_bytes = uploaded_file.read(MAX_FILE_SIZE + 1)
     if len(file_bytes) > MAX_FILE_SIZE:
-        flash("The Excel file must be 5 MB or smaller.", "error")
+        flash(translate("The Excel file must be 5 MB or smaller."), "error")
         return redirect(url_for("contacts.index"))
 
     try:
         contacts, invalid_rows = parse_import_workbook(file_bytes)
         imported_count, duplicate_count = import_contacts(get_db(), contacts)
-    except Exception as error:
-        flash(f"The Excel file could not be imported: {error}", "error")
+    except ValueError as error:
+        flash(translate("The Excel file could not be imported: {reason}", reason=error), "error")
+        return redirect(url_for("contacts.index"))
+    except Exception:
+        flash(translate("The Excel file could not be imported."), "error")
         return redirect(url_for("contacts.index"))
 
     flash(
-        f"Imported {imported_count} contact(s). "
-        f"Skipped {duplicate_count} duplicate(s). "
-        f"Ignored {len(invalid_rows)} invalid row(s).",
+        translate(
+            "Imported {imported} contact(s). "
+            "Skipped {duplicates} duplicate(s). "
+            "Ignored {invalid} invalid row(s).",
+            imported=imported_count,
+            duplicates=duplicate_count,
+            invalid=len(invalid_rows),
+        ),
         "success",
     )
     if invalid_rows:

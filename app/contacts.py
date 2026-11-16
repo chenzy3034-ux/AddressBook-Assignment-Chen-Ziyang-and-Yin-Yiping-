@@ -1,6 +1,7 @@
 from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 
 from .db import get_db
+from .i18n import translate
 
 
 bp = Blueprint("contacts", __name__)
@@ -154,10 +155,15 @@ def index():
         query += " WHERE " + " AND ".join(conditions)
     query += " ORDER BY contacts.name COLLATE NOCASE, contacts.id"
 
-    contacts = get_db().execute(query, parameters).fetchall()
+    database = get_db()
+    with database:
+        database.execute("BEGIN")
+        contacts = database.execute(query, parameters).fetchall()
+        total_contacts = database.execute("SELECT COUNT(*) FROM contacts").fetchone()[0]
     return render_template(
         "contact_list.html",
         contacts=contacts,
+        total_contacts=total_contacts,
         active_filter=active_filter,
         search_query=search_query,
     )
@@ -181,11 +187,11 @@ def create():
                     "INSERT INTO contacts (name) VALUES (?)", (values["name"],)
                 )
                 insert_contact_methods(database, cursor.lastrowid, valid_methods)
-            flash("Contact created successfully.", "success")
+            flash(translate("Contact created successfully."), "success")
             return redirect(url_for("contacts.detail", contact_id=cursor.lastrowid))
 
         for error in errors:
-            flash(error, "error")
+            flash(translate(error), "error")
 
     return render_template(
         "contact_form.html",
@@ -207,7 +213,7 @@ def detail(contact_id):
             "methods": [
                 {
                     "label": method["label"]
-                    or DEFAULT_METHOD_LABELS[method_type],
+                    or translate(DEFAULT_METHOD_LABELS[method_type]),
                     "value": method["value"],
                 }
                 for method in methods
@@ -237,9 +243,9 @@ def toggle_favorite(contact_id):
     database.commit()
 
     if is_favorite:
-        flash(f"{contact['name']} was added to favorites.", "success")
+        flash(translate("{name} was added to favorites.", name=contact["name"]), "success")
     else:
-        flash(f"{contact['name']} was removed from favorites.", "success")
+        flash(translate("{name} was removed from favorites.", name=contact["name"]), "success")
 
     active_filter = request.form.get("filter", "all")
     if active_filter not in ("all", "favorites"):
@@ -280,11 +286,11 @@ def edit(contact_id):
                     (contact_id,),
                 )
                 insert_contact_methods(database, contact_id, valid_methods)
-            flash("Contact updated successfully.", "success")
+            flash(translate("Contact updated successfully."), "success")
             return redirect(url_for("contacts.detail", contact_id=contact_id))
 
         for error in errors:
-            flash(error, "error")
+            flash(translate(error), "error")
 
     return render_template(
         "contact_form.html",
@@ -301,5 +307,5 @@ def delete(contact_id):
     database = get_db()
     database.execute("DELETE FROM contacts WHERE id = ?", (contact_id,))
     database.commit()
-    flash(f"{contact['name']} was deleted.", "success")
+    flash(translate("{name} was deleted.", name=contact["name"]), "success")
     return redirect(url_for("contacts.index"))

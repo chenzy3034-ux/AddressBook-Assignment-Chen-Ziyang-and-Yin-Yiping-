@@ -1,17 +1,17 @@
 {% extends "base.html" %}
 
-{% block title %}{{ contact['name'] }} | Address Book{% endblock %}
+{% block title %}{{ contact['name'] }} | {{ t('Address Book') }}{% endblock %}
 
 {% block content %}
 <div class="narrow-page">
-    <a class="back-link" href="{{ url_for('contacts.index') }}">&larr; Back to contacts</a>
+    <a class="back-link" href="{{ url_for('contacts.index') }}">&larr; {{ t('Back to contacts') }}</a>
     <article class="panel contact-detail">
         <div class="detail-header">
             <div class="avatar avatar-large" aria-hidden="true">{{ contact['name'][0]|upper }}</div>
             <div>
                 <h1>{{ contact['name'] }}</h1>
                 {% if contact['is_favorite'] %}
-                    <span class="favorite-badge">&#9733; Favorite contact</span>
+                    <span class="favorite-badge">&#9733; {{ t('Favorite contact') }}</span>
                 {% endif %}
             </div>
         </div>
@@ -20,7 +20,7 @@
             {% for section in method_sections %}
                 {% if section['methods'] %}
                     <section class="method-section">
-                        <h2>{{ section['title'] }}</h2>
+                        <h2>{{ t(section['title']) }}</h2>
                         <dl class="detail-list">
                             {% for method in section['methods'] %}
                                 <div>
@@ -43,10 +43,10 @@
         </div>
 
         <div class="detail-actions">
-            <a class="button button-primary" href="{{ url_for('contacts.edit', contact_id=contact['id']) }}">Edit contact</a>
-            <form method="post" action="{{ url_for('contacts.delete', contact_id=contact['id']) }}" id="delete-contact">
+            <a class="button button-primary" href="{{ url_for('contacts.edit', contact_id=contact['id']) }}">{{ t('Edit contact') }}</a>
+            <form method="post" action="{{ url_for('contacts.delete', contact_id=contact['id']) }}" id="delete-contact" data-confirm="{{ t('Delete this contact?') }}">
                 {% include "csrf_field.html" %}
-                <button class="button button-danger" type="submit">Delete contact</button>
+                <button class="button button-danger" type="submit">{{ t('Delete contact') }}</button>
             </form>
         </div>
     </article>

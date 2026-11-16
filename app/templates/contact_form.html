@@ -1,51 +1,51 @@
 {% extends "base.html" %}
 
-{% block title %}{{ page_title }} | Address Book{% endblock %}
+{% block title %}{{ t(page_title) }} | {{ t('Address Book') }}{% endblock %}
 
 {% block content %}
 <div class="narrow-page form-page">
-    <a class="back-link" href="{{ url_for('contacts.index') }}">&larr; Back to contacts</a>
+    <a class="back-link" href="{{ url_for('contacts.index') }}">&larr; {{ t('Back to contacts') }}</a>
     <div class="panel">
-        <h1>{{ page_title }}</h1>
-        <p class="form-note">A name and at least one contact method are required.</p>
+        <h1>{{ t(page_title) }}</h1>
+        <p class="form-note">{{ t('A name and at least one contact method are required.') }}</p>
 
         <form method="post" class="contact-form">
             {% include "csrf_field.html" %}
-            <label for="name">Name <span aria-hidden="true">*</span></label>
+            <label for="name">{{ t('Name') }} <span aria-hidden="true">*</span></label>
             <input id="name" name="name" type="text" maxlength="120" value="{{ contact['name'] }}" required autofocus>
 
             <div class="method-heading">
-                <h2>Contact methods</h2>
-                <button class="button button-secondary" id="add-method" type="button">Add method</button>
+                <h2>{{ t('Contact methods') }}</h2>
+                <button class="button button-secondary" id="add-method" type="button">{{ t('Add method') }}</button>
             </div>
 
             <div class="method-list" id="contact-methods">
                 {% for method in methods %}
                     <div class="method-row">
                         <label>
-                            <span>Type</span>
+                            <span>{{ t('Type') }}</span>
                             <select name="method_type">
                                 {% for method_type, title in method_types.items() %}
-                                    <option value="{{ method_type }}"{% if method['method_type'] == method_type %} selected{% endif %}>{{ title }}</option>
+                                    <option value="{{ method_type }}"{% if method['method_type'] == method_type %} selected{% endif %}>{{ t(title) }}</option>
                                 {% endfor %}
                             </select>
                         </label>
                         <label>
-                            <span>Label</span>
-                            <input name="method_label" type="text" maxlength="50" value="{{ method['label'] }}" placeholder="Mobile, work, personal">
+                            <span>{{ t('Label') }}</span>
+                            <input name="method_label" type="text" maxlength="50" value="{{ method['label'] }}" placeholder="{{ t('Mobile, work, personal') }}">
                         </label>
                         <label class="method-value-field">
-                            <span>Value</span>
-                            <input name="method_value" type="text" maxlength="500" value="{{ method['value'] }}" placeholder="Phone, email, username, or address">
+                            <span>{{ t('Value') }}</span>
+                            <input name="method_value" type="text" maxlength="500" value="{{ method['value'] }}" placeholder="{{ t('Phone, email, username, or address') }}">
                         </label>
-                        <button class="remove-method" type="button" aria-label="Remove contact method">Remove</button>
+                        <button class="remove-method" type="button" aria-label="{{ t('Remove contact method') }}">{{ t('Remove') }}</button>
                     </div>
                 {% endfor %}
             </div>
 
             <div class="form-actions">
-                <button class="button button-primary" type="submit">Save contact</button>
-                <a class="button button-secondary" href="{{ url_for('contacts.index') }}">Cancel</a>
+                <button class="button button-primary" type="submit">{{ t('Save contact') }}</button>
+                <a class="button button-secondary" href="{{ url_for('contacts.index') }}">{{ t('Cancel') }}</a>
             </div>
         </form>
     </div>
@@ -54,22 +54,22 @@
 <template id="contact-method-template">
     <div class="method-row">
         <label>
-            <span>Type</span>
+            <span>{{ t('Type') }}</span>
             <select name="method_type">
                 {% for method_type, title in method_types.items() %}
-                    <option value="{{ method_type }}">{{ title }}</option>
+                    <option value="{{ method_type }}">{{ t(title) }}</option>
                 {% endfor %}
             </select>
         </label>
         <label>
-            <span>Label</span>
-            <input name="method_label" type="text" maxlength="50" placeholder="Mobile, work, personal">
+            <span>{{ t('Label') }}</span>
+            <input name="method_label" type="text" maxlength="50" placeholder="{{ t('Mobile, work, personal') }}">
         </label>
         <label class="method-value-field">
-            <span>Value</span>
-            <input name="method_value" type="text" maxlength="500" placeholder="Phone, email, username, or address">
+            <span>{{ t('Value') }}</span>
+            <input name="method_value" type="text" maxlength="500" placeholder="{{ t('Phone, email, username, or address') }}">
         </label>
-        <button class="remove-method" type="button" aria-label="Remove contact method">Remove</button>
+        <button class="remove-method" type="button" aria-label="{{ t('Remove contact method') }}">{{ t('Remove') }}</button>
     </div>
 </template>
 

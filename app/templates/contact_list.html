@@ -1,50 +1,59 @@
 {% extends "base.html" %}
 
-{% block title %}Contacts | Address Book{% endblock %}
+{% block title %}{{ t('Contacts') }} | {{ t('Address Book') }}{% endblock %}
 
 {% block content %}
 <div class="page-heading">
-    <h1>Contacts</h1>
-    <span class="contact-count">{{ contacts|length }} result{% if contacts|length != 1 %}s{% endif %}</span>
+    <h1>{{ t('My address book') }}</h1>
+    <div class="notebook" aria-hidden="true">
+        <div class="notebook-page">
+            <span>Yin Yiping</span>
+            <span>1228</span>
+        </div>
+        <div class="notebook-page">
+            <span>Chen Ziyang</span>
+            <span>1306</span>
+        </div>
+    </div>
 </div>
 
-<section class="directory-tools" aria-label="Contact search and filters">
+<section class="directory-tools" aria-label="{{ t('Contact search and filters') }}">
     <form class="search-form" method="get" action="{{ url_for('contacts.index') }}">
         <input name="filter" type="hidden" value="{{ active_filter }}">
         <label class="search-field">
-            <span class="search-icon" aria-hidden="true">&#128269;</span>
-            <span class="visually-hidden">Search contacts</span>
-            <input name="q" type="search" maxlength="120" value="{{ search_query }}" placeholder="Search by name or contact details">
+            <span class="search-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">{{ t('Search contacts') }}</span>
+            <input name="q" type="search" maxlength="120" value="{{ search_query }}" placeholder="{{ t('Search by name or contact details') }}">
         </label>
-        <button class="button button-primary" type="submit">Search</button>
+        <button class="button button-primary" type="submit">{{ t('Search') }}</button>
         {% if search_query %}
-            <a class="button button-secondary" href="{{ url_for('contacts.index', filter=active_filter) }}">Clear</a>
+            <a class="button button-secondary" href="{{ url_for('contacts.index', filter=active_filter) }}">{{ t('Clear') }}</a>
         {% endif %}
     </form>
 
-    <nav class="contact-filters" aria-label="Contact filters">
-        <a class="filter-link{% if active_filter == 'all' %} active{% endif %}" href="{{ url_for('contacts.index', filter='all', q=search_query) }}">All contacts</a>
-        <a class="filter-link{% if active_filter == 'favorites' %} active{% endif %}" href="{{ url_for('contacts.index', filter='favorites', q=search_query) }}">Favorite contacts</a>
+    <nav class="contact-filters" aria-label="{{ t('Contact filters') }}">
+        <a class="filter-link{% if active_filter == 'all' %} active{% endif %}" href="{{ url_for('contacts.index', filter='all', q=search_query) }}">{{ t('All contacts') }}</a>
+        <a class="filter-link{% if active_filter == 'favorites' %} active{% endif %}" href="{{ url_for('contacts.index', filter='favorites', q=search_query) }}">{{ t('Favorite contacts') }}</a>
     </nav>
 </section>
 
-<section class="excel-actions" aria-label="Excel import and export">
+<section class="excel-actions" aria-label="{{ t('Excel import and export') }}">
     <h2>Excel</h2>
     <form class="import-form" method="post" action="{{ url_for('excel.import_contacts_route') }}" enctype="multipart/form-data">
         {% include "csrf_field.html" %}
         <label class="file-picker">
-            <span>Choose .xlsx file</span>
+            <span>{{ t('Choose .xlsx file') }}</span>
             <span class="file-control">
-                <span class="file-select-button">Select file</span>
-                <span class="file-name" id="selected-file-name">No file selected</span>
+                <span class="file-select-button">{{ t('Select file') }}</span>
+                <span class="file-name" id="selected-file-name">{{ t('No file selected') }}</span>
             </span>
             <input class="file-input-native" id="excel-file-input" name="file" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required>
         </label>
-        <button class="button button-secondary" type="submit">Import</button>
+        <button class="button button-secondary" type="submit">{{ t('Import') }}</button>
     </form>
     <div class="excel-links">
-        <a class="button button-secondary" href="{{ url_for('static', filename='examples/address_book_import_example.xlsx') }}" download>Download example</a>
-        <a class="button button-primary" href="{{ url_for('excel.export_contacts') }}">Export contacts</a>
+        <a class="button button-secondary" href="{{ url_for('static', filename='examples/address_book_import_example.xlsx') }}" download>{{ t('Download example') }}</a>
+        <a class="button button-primary" href="{{ url_for('excel.export_contacts') }}">{{ t('Export contacts') }}</a>
     </div>
 </section>
 
@@ -61,8 +70,8 @@
                     <button
                         class="favorite-button{% if contact['is_favorite'] %} is-favorite{% endif %}"
                         type="submit"
-                        aria-label="{% if contact['is_favorite'] %}Remove {{ contact['name'] }} from favorites{% else %}Add {{ contact['name'] }} to favorites{% endif %}"
-                        title="{% if contact['is_favorite'] %}Remove from favorites{% else %}Add to favorites{% endif %}"
+                        aria-label="{{ t('Remove {name} from favorites' if contact['is_favorite'] else 'Add {name} to favorites', name=contact['name']) }}"
+                        title="{{ t('Remove from favorites' if contact['is_favorite'] else 'Add to favorites') }}"
                     >{% if contact['is_favorite'] %}&#9733;{% else %}&#9734;{% endif %}</button>
                 </form>
                 <div class="avatar" aria-hidden="true">{{ contact['name'][0]|upper }}</div>
@@ -71,7 +80,7 @@
                     {% if contact['primary_phone'] %}<p>{{ contact['primary_phone'] }}</p>{% endif %}
                     {% if contact['primary_email'] %}<p>{{ contact['primary_email'] }}</p>{% endif %}
                 </div>
-                <a class="text-link" href="{{ url_for('contacts.detail', contact_id=contact['id']) }}">View</a>
+                <a class="text-link" href="{{ url_for('contacts.detail', contact_id=contact['id']) }}">{{ t('View') }}</a>
             </article>
         {% endfor %}
     </div>
@@ -79,19 +88,20 @@
     <section class="empty-state">
         {% if search_query %}
             <div class="empty-icon" aria-hidden="true">?</div>
-            <h2>No matching contacts</h2>
-            <p>Try a different name, phone number, email, label, or address.</p>
-            <a class="button button-secondary" href="{{ url_for('contacts.index', filter=active_filter) }}">Clear search</a>
+            <h2>{{ t('No matching contacts') }}</h2>
+            <p>{{ t('Try a different name, phone number, email, label, or address.') }}</p>
+            <a class="button button-secondary" href="{{ url_for('contacts.index', filter=active_filter) }}">{{ t('Clear search') }}</a>
         {% elif active_filter == 'favorites' %}
             <div class="empty-icon" aria-hidden="true">&#9734;</div>
-            <h2>No favorite contacts</h2>
-            <p>Select the star beside a contact to add it to your favorites.</p>
-            <a class="button button-secondary" href="{{ url_for('contacts.index', filter='all') }}">View all contacts</a>
+            <h2>{{ t('No favorite contacts') }}</h2>
+            <p>{{ t('Select the star beside a contact to add it to your favorites.') }}</p>
+            <a class="button button-secondary" href="{{ url_for('contacts.index', filter='all') }}">{{ t('View all contacts') }}</a>
         {% else %}
             <div class="empty-icon" aria-hidden="true">+</div>
-            <h2>No contacts yet</h2>
-            <a class="button button-primary" href="{{ url_for('contacts.create') }}">Add first contact</a>
+            <h2>{{ t('No contacts yet') }}</h2>
+            <a class="button button-primary" href="{{ url_for('contacts.create') }}">{{ t('Add first contact') }}</a>
         {% endif %}
     </section>
 {% endif %}
+<p class="contact-count">{{ t('{count} contact in total' if total_contacts == 1 else '{count} contacts in total', count=total_contacts) }}</p>
 {% endblock %}

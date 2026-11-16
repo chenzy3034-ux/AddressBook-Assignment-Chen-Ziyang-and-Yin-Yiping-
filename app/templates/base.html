@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="{{ language() }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#3157d5">
-    <title>{% block title %}Address Book{% endblock %}</title>
+    <meta name="theme-color" content="#3b2d24">
+    <title>{% block title %}{{ t('Address Book') }}{% endblock %}</title>
     <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='ambient-background.css') }}">
@@ -15,10 +15,16 @@
     <header class="site-header">
         <div class="container header-content">
             <a class="brand" href="{{ url_for('contacts.index') }}">
-                <span class="brand-mark" aria-hidden="true">AB</span>
-                <span>Address Book</span>
+                <span class="brand-mark" aria-hidden="true"></span>
+                <span>{{ t('Address Book') }}</span>
             </a>
-            <a class="button button-primary" href="{{ url_for('contacts.create') }}">Add contact</a>
+            <div class="header-actions">
+                <nav class="language-switch" aria-label="{{ t('Language') }}">
+                    <a href="{{ language_url('zh-CN') }}" lang="zh-CN"{% if language() == 'zh-CN' %} aria-current="true"{% endif %}>中文</a>
+                    <a href="{{ language_url('en') }}" lang="en"{% if language() == 'en' %} aria-current="true"{% endif %}>EN</a>
+                </nav>
+                <a class="button header-add" href="{{ url_for('contacts.create') }}">{{ t('Add contact') }}</a>
+            </div>
         </div>
     </header>
 

@@ -18,19 +18,19 @@
 .orb-indigo {
     top: -25%;
     right: -20%;
-    background: radial-gradient(circle, #aeb9f378 0%, #ccd2fa40 40%, transparent 70%);
+    background: radial-gradient(circle, #f5e5c862 0%, #f9efda38 40%, transparent 70%);
 }
 
 .orb-mint {
     top: 25%;
     left: -28%;
-    background: radial-gradient(circle, #a9e6df65 0%, #bfecea30 40%, transparent 70%);
+    background: radial-gradient(circle, #eee2cd4f 0%, #f6eedf2b 40%, transparent 70%);
 }
 
 .orb-rose {
     bottom: -35%;
     right: -12%;
-    background: radial-gradient(circle, #dabdf26b 0%, #ecdafa30 40%, transparent 70%);
+    background: radial-gradient(circle, #f4e4d34f 0%, #faede125 40%, transparent 70%);
 }
 
 .ambient-pattern {
@@ -38,7 +38,7 @@
     inset: -60px;
     background-image: url("hero-plus.svg");
     background-size: 60px 60px;
-    opacity: 0.15;
+    opacity: 0.065;
 }
 
 .floating-symbol {
@@ -46,8 +46,8 @@
     left: var(--left);
     top: var(--top);
     font: 500 var(--size) "Cascadia Code", Consolas, monospace;
-    color: #7c8cc2;
-    opacity: 0.16;
+    color: #947c5d;
+    opacity: 0.1;
     transform: rotate(var(--rotation));
     user-select: none;
 }

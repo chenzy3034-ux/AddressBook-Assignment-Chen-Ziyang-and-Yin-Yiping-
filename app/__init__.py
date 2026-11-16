@@ -34,9 +34,10 @@ def create_app(test_config=None):
                 ):
                     abort(403)
 
-    from . import db
+    from . import db, i18n
 
     db.init_app(app)
+    i18n.init_app(app)
 
     from .contacts import bp
 
