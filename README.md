@@ -4,6 +4,9 @@ A small Flask application for managing contacts. The first development phase
 supports creating, viewing, editing, and deleting contacts with persistent
 SQLite storage.
 
+See the [project coding standards](CODE_STANDARDS.md) for implementation,
+testing, and Git collaboration conventions.
+
 ## Features
 
 - View all contacts in a simple web interface
