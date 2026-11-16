@@ -1,0 +1,17 @@
+<div class="ambient-scene" aria-hidden="true">
+    <div class="ambient-orb orb-indigo"></div>
+    <div class="ambient-orb orb-mint"></div>
+    <div class="ambient-orb orb-rose"></div>
+    <div class="ambient-pattern"></div>
+    {% for symbol in ['+', '−', '×', '÷', '=', '(', ')', '+', '×', '=', '÷', '−'] %}
+        {% set index = loop.index0 %}
+        <span class="floating-symbol" style="
+            --left: {{ (index * 29 + 8) % 96 }}%;
+            --top: {{ (index * 37 + 12) % 92 }}%;
+            --duration: {{ 18 + index % 5 * 4 }}s;
+            --delay: {{ -index * 3 }}s;
+            --rotation: {{ -15 if index % 2 else 15 }}deg;
+            --size: {{ 16 + index % 3 * 9 }}px;
+        ">{{ symbol }}</span>
+    {% endfor %}
+</div>

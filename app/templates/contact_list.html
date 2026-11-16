@@ -4,11 +4,7 @@
 
 {% block content %}
 <div class="page-heading">
-    <div>
-        <p class="eyebrow">Contact directory</p>
-        <h1>Contacts</h1>
-        <p class="subtitle">Keep essential contact details in one place.</p>
-    </div>
+    <h1>Contacts</h1>
     <span class="contact-count">{{ contacts|length }} result{% if contacts|length != 1 %}s{% endif %}</span>
 </div>
 
@@ -33,10 +29,7 @@
 </section>
 
 <section class="excel-actions" aria-label="Excel import and export">
-    <div>
-        <h2>Excel</h2>
-        <p>Import or export contacts using the compatible workbook format.</p>
-    </div>
+    <h2>Excel</h2>
     <form class="import-form" method="post" action="{{ url_for('excel.import_contacts_route') }}" enctype="multipart/form-data">
         <label class="file-picker">
             <span>Choose .xlsx file</span>
@@ -95,7 +88,6 @@
         {% else %}
             <div class="empty-icon" aria-hidden="true">+</div>
             <h2>No contacts yet</h2>
-            <p>Add your first contact to start building your address book.</p>
             <a class="button button-primary" href="{{ url_for('contacts.create') }}">Add first contact</a>
         {% endif %}
     </section>

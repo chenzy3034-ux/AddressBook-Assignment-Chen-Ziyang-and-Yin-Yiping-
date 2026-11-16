@@ -6,7 +6,6 @@
 <div class="narrow-page form-page">
     <a class="back-link" href="{{ url_for('contacts.index') }}">&larr; Back to contacts</a>
     <div class="panel">
-        <p class="eyebrow">Contact details</p>
         <h1>{{ page_title }}</h1>
         <p class="form-note">A name and at least one contact method are required.</p>
 
@@ -15,10 +14,7 @@
             <input id="name" name="name" type="text" maxlength="120" value="{{ contact['name'] }}" required autofocus>
 
             <div class="method-heading">
-                <div>
-                    <h2>Contact methods</h2>
-                    <p class="form-note">Add as many phone numbers, emails, social accounts, or addresses as needed.</p>
-                </div>
+                <h2>Contact methods</h2>
                 <button class="button button-secondary" id="add-method" type="button">Add method</button>
             </div>
 

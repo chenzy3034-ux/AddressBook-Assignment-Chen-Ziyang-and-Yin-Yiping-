@@ -1,0 +1,93 @@
+/* Background layers adapted from fullstack-web/frontend/src/AmbientEffects.vue. */
+.ambient-scene {
+    --background-speed: 1.3;
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.ambient-orb {
+    position: absolute;
+    width: min(75vw, 800px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+}
+
+.orb-indigo {
+    top: -25%;
+    right: -20%;
+    background: radial-gradient(circle, #aeb9f378 0%, #ccd2fa40 40%, transparent 70%);
+}
+
+.orb-mint {
+    top: 25%;
+    left: -28%;
+    background: radial-gradient(circle, #a9e6df65 0%, #bfecea30 40%, transparent 70%);
+}
+
+.orb-rose {
+    bottom: -35%;
+    right: -12%;
+    background: radial-gradient(circle, #dabdf26b 0%, #ecdafa30 40%, transparent 70%);
+}
+
+.ambient-pattern {
+    position: absolute;
+    inset: -60px;
+    background-image: url("hero-plus.svg");
+    background-size: 60px 60px;
+    opacity: 0.15;
+}
+
+.floating-symbol {
+    position: absolute;
+    left: var(--left);
+    top: var(--top);
+    font: 500 var(--size) "Cascadia Code", Consolas, monospace;
+    color: #7c8cc2;
+    opacity: 0.16;
+    transform: rotate(var(--rotation));
+    user-select: none;
+}
+
+@keyframes orb-flow {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(-10%, 12%) scale(1.12); }
+}
+
+@keyframes pattern-drift {
+    to { transform: translate(60px, 60px); }
+}
+
+@keyframes symbol-float {
+    0%, 100% { transform: translateY(0) rotate(var(--rotation)); }
+    50% { transform: translateY(-38px) rotate(calc(var(--rotation) * -1)); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .orb-indigo {
+        animation: orb-flow calc(22s / var(--background-speed)) ease-in-out infinite;
+    }
+
+    .orb-mint {
+        animation: orb-flow calc(28s / var(--background-speed)) calc(-9s / var(--background-speed)) ease-in-out infinite reverse;
+    }
+
+    .orb-rose {
+        animation: orb-flow calc(26s / var(--background-speed)) calc(-17s / var(--background-speed)) ease-in-out infinite;
+    }
+
+    .ambient-pattern {
+        animation: pattern-drift calc(36s / var(--background-speed)) linear infinite;
+    }
+
+    .floating-symbol {
+        animation: symbol-float calc(var(--duration) / var(--background-speed)) calc(var(--delay) / var(--background-speed)) ease-in-out infinite;
+    }
+
+    .ambient-scene.is-paused > * {
+        animation-play-state: paused;
+    }
+}

@@ -7,8 +7,11 @@
     <title>{% block title %}Address Book{% endblock %}</title>
     <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='ambient-background.css') }}">
+    <script src="{{ url_for('static', filename='ambient-background.js') }}" defer></script>
 </head>
 <body>
+    {% include "ambient_background.html" %}
     <header class="site-header">
         <div class="container header-content">
             <a class="brand" href="{{ url_for('contacts.index') }}">
