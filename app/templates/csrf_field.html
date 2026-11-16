@@ -1,0 +1,3 @@
+{% if config.get("CSRF_ENABLED") %}
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+{% endif %}

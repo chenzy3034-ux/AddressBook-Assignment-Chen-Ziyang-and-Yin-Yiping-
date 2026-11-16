@@ -2,6 +2,7 @@ import re
 from collections import defaultdict
 from datetime import date, datetime
 from io import BytesIO
+from zipfile import ZipFile
 
 from flask import Blueprint, flash, redirect, request, send_file, url_for
 from openpyxl import Workbook, load_workbook
@@ -28,6 +29,8 @@ METHOD_HEADER_PATTERN = re.compile(
 )
 MAX_IMPORT_ROWS = 5000
 MAX_FILE_SIZE = 5 * 1024 * 1024
+MAX_EXPANDED_SIZE = 32 * 1024 * 1024
+MAX_ARCHIVE_ENTRIES = 256
 
 
 def normalize_text(value):
@@ -167,6 +170,14 @@ def parse_favorite(value):
 
 
 def parse_import_workbook(file_bytes):
+    with ZipFile(BytesIO(file_bytes)) as archive:
+        entries = archive.infolist()
+        if (
+            len(entries) > MAX_ARCHIVE_ENTRIES
+            or sum(entry.file_size for entry in entries) > MAX_EXPANDED_SIZE
+        ):
+            raise ValueError("The workbook is too large after decompression.")
+
     workbook = load_workbook(
         filename=BytesIO(file_bytes), read_only=True, data_only=True, keep_links=False
     )

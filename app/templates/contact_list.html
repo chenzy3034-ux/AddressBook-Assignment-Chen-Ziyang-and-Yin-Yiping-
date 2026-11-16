@@ -31,6 +31,7 @@
 <section class="excel-actions" aria-label="Excel import and export">
     <h2>Excel</h2>
     <form class="import-form" method="post" action="{{ url_for('excel.import_contacts_route') }}" enctype="multipart/form-data">
+        {% include "csrf_field.html" %}
         <label class="file-picker">
             <span>Choose .xlsx file</span>
             <span class="file-control">
@@ -54,6 +55,7 @@
         {% for contact in contacts %}
             <article class="contact-card">
                 <form method="post" action="{{ url_for('contacts.toggle_favorite', contact_id=contact['id']) }}">
+                    {% include "csrf_field.html" %}
                     <input type="hidden" name="filter" value="{{ active_filter }}">
                     <input type="hidden" name="q" value="{{ search_query }}">
                     <button

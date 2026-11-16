@@ -1,6 +1,7 @@
 import os
+import secrets
 
-from flask import Flask, render_template
+from flask import Flask, abort, render_template, request, session
 
 
 def create_app(test_config=None):
@@ -13,7 +14,25 @@ def create_app(test_config=None):
     if test_config is not None:
         app.config.from_mapping(test_config)
 
-    os.makedirs(app.instance_path, exist_ok=True)
+    if app.config["DATABASE"] != ":memory:":
+        os.makedirs(os.path.dirname(os.path.abspath(app.config["DATABASE"])), exist_ok=True)
+
+    if app.config.get("CSRF_ENABLED"):
+        @app.template_global()
+        def csrf_token():
+            if "csrf_token" not in session:
+                session["csrf_token"] = secrets.token_hex(32)
+            return session["csrf_token"]
+
+        @app.before_request
+        def verify_csrf():
+            if request.method == "POST":
+                expected = session.get("csrf_token", "")
+                provided = request.form.get("csrf_token", "")
+                if not expected or not secrets.compare_digest(
+                    expected.encode("utf-8"), provided.encode("utf-8")
+                ):
+                    abort(403)
 
     from . import db
 

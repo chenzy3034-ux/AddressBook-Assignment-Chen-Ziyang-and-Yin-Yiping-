@@ -10,6 +10,7 @@
         <p class="form-note">A name and at least one contact method are required.</p>
 
         <form method="post" class="contact-form">
+            {% include "csrf_field.html" %}
             <label for="name">Name <span aria-hidden="true">*</span></label>
             <input id="name" name="name" type="text" maxlength="120" value="{{ contact['name'] }}" required autofocus>
 

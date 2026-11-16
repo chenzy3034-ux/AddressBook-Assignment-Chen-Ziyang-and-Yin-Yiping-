@@ -1,0 +1,34 @@
+[Unit]
+Description=Address Book web application
+After=network.target
+
+[Service]
+User=web-address-book
+Group=web-address-book
+WorkingDirectory=/opt/websites/address-book/current
+EnvironmentFile=/etc/web-address-book/environment
+Environment=PYTHONDONTWRITEBYTECODE=1
+StateDirectory=web-address-book
+StateDirectoryMode=0700
+UMask=0077
+ExecStart=/opt/websites/address-book/current/.venv/bin/gunicorn --bind 127.0.0.1:3002 --workers 1 --threads 2 --timeout 20 --max-requests 500 --max-requests-jitter 50 deploy.wsgi:application
+Restart=on-failure
+RestartSec=3s
+MemoryHigh=120M
+MemoryMax=180M
+CPUQuota=45%
+TasksMax=24
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictAddressFamilies=AF_UNIX AF_INET
+IPAddressDeny=any
+IPAddressAllow=localhost
+
+[Install]
+WantedBy=multi-user.target

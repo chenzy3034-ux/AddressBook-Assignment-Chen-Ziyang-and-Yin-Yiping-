@@ -44,10 +44,12 @@
 
         <div class="detail-actions">
             <a class="button button-primary" href="{{ url_for('contacts.edit', contact_id=contact['id']) }}">Edit contact</a>
-            <form method="post" action="{{ url_for('contacts.delete', contact_id=contact['id']) }}" onsubmit="return confirm('Delete this contact?');">
+            <form method="post" action="{{ url_for('contacts.delete', contact_id=contact['id']) }}" id="delete-contact">
+                {% include "csrf_field.html" %}
                 <button class="button button-danger" type="submit">Delete contact</button>
             </form>
         </div>
     </article>
 </div>
+<script src="{{ url_for('static', filename='confirm-delete.js') }}" defer></script>
 {% endblock %}
